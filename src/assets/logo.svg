@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- 外圆 -->
+  <circle cx="24" cy="24" r="22" stroke="#409EFF" stroke-width="2.5" fill="#1d1e23"/>
+  <!-- 网络流量波形 -->
+  <polyline points="6,24 12,16 18,30 24,12 30,32 36,20 42,24"
+    stroke="#409EFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- 中心节点 -->
+  <circle cx="24" cy="12" r="2.5" fill="#409EFF"/>
+  <circle cx="12" cy="16" r="2" fill="#67C23A"/>
+  <circle cx="36" cy="20" r="2" fill="#E6A23C"/>
+</svg>

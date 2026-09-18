@@ -1,0 +1,175 @@
+# ============================================================
+#  application.yml  — 网络流量管理系统后端配置
+# ============================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 5000
+  # GZIP 压缩（减少网络传输，提升性能）
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript
+    min-response-size: 1024
+
+spring:
+  application:
+    name: flow-control-backend
+
+  # 开发环境数据源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/flow_control_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root123
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: true
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+    open-in-view: false
+
+  # JSON 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# ============================================================
+# JWT 配置
+# ============================================================
+jwt:
+  # JWT 签名密钥（生产环境请通过环境变量或配置中心注入）
+  secret: FlowControl@Secret@2026#KeyForJwtTokenSigningMustBeLongEnough!
+  # Access Token 有效期（毫秒）：15分钟
+  access-token-ttl: 900000
+  # Refresh Token 有效期（毫秒）：7天
+  refresh-token-ttl: 604800000
+  # Token 前缀
+  token-prefix: "Bearer "
+  # 请求头名称
+  header-name: "Authorization"
+
+# ============================================================
+# Excel 导入/导出配置
+# ============================================================
+excel:
+  # 导入文件最大大小（MB）
+  max-import-size: 10
+  # 导出文件存储路径
+  export-dir: ./exports
+
+# ============================================================
+# AI 服务配置（支持 OpenAI / 豆包 / DeepSeek / Ollama）
+# ============================================================
+ai:
+  # 是否启用 AI 功能
+  enabled: true
+  # 服务商类型：openai | doubao | deepseek | ollama
+  provider: deepseek
+  # API 地址
+  base-url: ${AI_BASE_URL:https://api.deepseek.com/v1}
+  # API Key（生产环境请通过环境变量注入）
+  api-key: ${AI_API_KEY:sk-2b46b3381f1149939af2a450f7cd184b}
+  # 默认模型
+  model: ${AI_MODEL:deepseek-chat}
+  # 最大回复 Token 数
+  max-tokens: 2048
+  # 创造性参数（0~1，越高越有创意）
+  temperature: 0.7
+  # 请求超时（毫秒）
+  timeout: 60000
+  # 对话历史最大条数
+  max-history: 20
+  # 系统提示词
+  system-prompt: |
+    你是一个专业的网络流量管理系统的AI助手，名为"流量卫士"。
+    你可以帮助用户：
+    1. 分析网络流量数据，识别异常流量和潜在风险
+    2. 解读服务器性能指标和告警信息
+    3. 提供网络优化建议和故障排查思路
+    4. 解答系统使用和配置相关问题
+    5. 生成数据报告和统计摘要
+
+    请始终以专业、耐心的态度回答，如果涉及具体数据请结合系统上下文进行分析。
+    如果数据不足以做出判断，请明确告知用户缺少哪些信息。
+
+
+# ============================================================
+# Redis 配置（用于登录限流）
+# ============================================================
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1ms
+
+# ============================================================
+# 日志配置
+# ============================================================
+logging:
+  level:
+    root: INFO
+    com.flowcontrol: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+  file:
+    name: ./logs/flow-control.log
+
+# ============================================================
+# Actuator 健康检查端点
+# ============================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
